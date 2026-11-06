@@ -83,4 +83,16 @@ public class WorkOrderModel {
             return statement.executeUpdate() > 0;
         }
     }
+
+    public boolean deleteWorkOrder(int id) throws SQLException {
+
+        String sql = "DELETE FROM work_order WHERE id = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, id);
+
+            return statement.executeUpdate() > 0;
+        }
+    }
 }
