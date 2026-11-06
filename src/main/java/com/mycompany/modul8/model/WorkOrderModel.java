@@ -57,4 +57,30 @@ public class WorkOrderModel {
             return statement.executeUpdate() > 0;
         }
     }
+
+    public boolean updateWorkOrder(WorkOrder workOrder) throws SQLException {
+
+        String sql = "UPDATE work_order SET "
+                + "nomor_wo = ?, "
+                + "nama_pekerjaan = ?, "
+                + "pemohon = ?, "
+                + "tanggal = ?, "
+                + "deskripsi = ?, "
+                + "status = ? "
+                + "WHERE id = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, workOrder.getNomorWO());
+            statement.setString(2, workOrder.getNamaPekerjaan());
+            statement.setString(3, workOrder.getPemohon());
+            statement.setDate(4,
+                    java.sql.Date.valueOf(workOrder.getTanggal()));
+            statement.setString(5, workOrder.getDeskripsi());
+            statement.setString(7, workOrder.getStatus());
+            statement.setInt(8, workOrder.getId());
+
+            return statement.executeUpdate() > 0;
+        }
+    }
 }
