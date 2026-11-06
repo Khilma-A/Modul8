@@ -10,12 +10,11 @@ public class WorkOrder {
     private String pemohon;
     private LocalDate tanggal;
     private String deskripsi;
-    private String prioritas;
     private String status;
 
     public WorkOrder(int id, String nomorWO, String namaPekerjaan,
             String pemohon, LocalDate tanggal, String deskripsi,
-            String prioritas, String status) {
+            String status) {
 
         this.id = id;
         this.nomorWO = nomorWO;
@@ -23,7 +22,6 @@ public class WorkOrder {
         this.pemohon = pemohon;
         this.tanggal = tanggal;
         this.deskripsi = deskripsi;
-        this.prioritas = prioritas;
         this.status = status;
     }
 
@@ -73,14 +71,6 @@ public class WorkOrder {
 
     public void setDeskripsi(String deskripsi) {
         this.deskripsi = deskripsi;
-    }
-
-    public String getPrioritas() {
-        return prioritas;
-    }
-
-    public void setPrioritas(String prioritas) {
-        this.prioritas = prioritas;
     }
 
     public String getStatus() {
