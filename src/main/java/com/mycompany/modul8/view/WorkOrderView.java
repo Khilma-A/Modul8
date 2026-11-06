@@ -55,11 +55,15 @@ public class WorkOrderView extends JPanel {
         JButton editButton = new JButton("Edit Work Order");
         editButton.addActionListener(e -> showEditForm());
 
+        JButton deleteButton = new JButton("Hapus Work Order");
+        deleteButton.addActionListener(e -> deleteWorkOrder());
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBackground(Color.WHITE);
         buttonPanel.add(refreshButton);
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);
+        buttonPanel.add(deleteButton);
 
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(Color.WHITE);
@@ -325,6 +329,58 @@ public class WorkOrderView extends JPanel {
                 JOptionPane.showMessageDialog(
                         this,
                         "Gagal memperbarui Work Order: " + e.getMessage(),
+                        "Kesalahan Database",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    }
+
+    private void deleteWorkOrder() {
+        int selectedRow = workOrderTable.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Pilih data Work Order yang ingin dihapus terlebih dahulu."
+            );
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Apakah kamu yakin ingin menghapus Work Order ini?",
+                "Konfirmasi Hapus",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                int id = Integer.parseInt(
+                        tableModel.getValueAt(selectedRow, 0).toString()
+                );
+
+                boolean success = controller.deleteWorkOrder(id);
+
+                if (success) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Work Order berhasil dihapus."
+                    );
+
+                    loadWorkOrders();
+                } else {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Work Order gagal dihapus."
+                    );
+                }
+
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Gagal menghapus Work Order: " + e.getMessage(),
                         "Kesalahan Database",
                         JOptionPane.ERROR_MESSAGE
                 );
