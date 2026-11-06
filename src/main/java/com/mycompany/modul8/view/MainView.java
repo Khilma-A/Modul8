@@ -47,17 +47,11 @@ public class MainView extends JFrame {
         );
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 22));
 
-        JLabel descriptionLabel = new JLabel(
-                "Kelola data Work Order perusahaan melalui aplikasi ini."
-        );
-        descriptionLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-
         JPanel welcomePanel = new JPanel();
         welcomePanel.setBackground(Color.WHITE);
         welcomePanel.setLayout(new GridLayout(2, 1, 0, 10));
 
         welcomePanel.add(welcomeLabel);
-        welcomePanel.add(descriptionLabel);
 
         JButton workOrderButton = new JButton("Lihat Daftar Work Order");
         workOrderButton.setFont(new Font("Arial", Font.BOLD, 14));
