@@ -1,27 +1,28 @@
 package com.mycompany.modul8.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class WorkOrder {
 
     private int id;
-    private String nomorWO;
     private String namaPekerjaan;
     private String pemohon;
     private LocalDate tanggal;
     private String deskripsi;
+    private BigDecimal harga;
     private String status;
 
-    public WorkOrder(int id, String nomorWO, String namaPekerjaan,
-            String pemohon, LocalDate tanggal, String deskripsi,
-            String status) {
+    public WorkOrder(int id, String namaPekerjaan,
+            String pemohon, LocalDate tanggal,
+            String deskripsi, BigDecimal harga, String status) {
 
         this.id = id;
-        this.nomorWO = nomorWO;
         this.namaPekerjaan = namaPekerjaan;
         this.pemohon = pemohon;
         this.tanggal = tanggal;
         this.deskripsi = deskripsi;
+        this.harga = harga;
         this.status = status;
     }
 
@@ -31,14 +32,6 @@ public class WorkOrder {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getNomorWO() {
-        return nomorWO;
-    }
-
-    public void setNomorWO(String nomorWO) {
-        this.nomorWO = nomorWO;
     }
 
     public String getNamaPekerjaan() {
@@ -71,6 +64,14 @@ public class WorkOrder {
 
     public void setDeskripsi(String deskripsi) {
         this.deskripsi = deskripsi;
+    }
+
+    public BigDecimal getHarga() {
+        return harga;
+    }
+
+    public void setHarga(BigDecimal harga) {
+        this.harga = harga;
     }
 
     public String getStatus() {

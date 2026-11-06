@@ -1,6 +1,7 @@
 package com.mycompany.modul8.model;
 
 import com.mycompany.modul8.database.DatabaseConnection;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,11 +23,11 @@ public class WorkOrderModel {
 
                 WorkOrder workOrder = new WorkOrder(
                         result.getInt("id"),
-                        result.getString("nomor_wo"),
                         result.getString("nama_pekerjaan"),
                         result.getString("pemohon"),
                         result.getDate("tanggal").toLocalDate(),
                         result.getString("deskripsi"),
+                        result.getBigDecimal("harga"),
                         result.getString("status")
                 );
 
@@ -40,19 +41,21 @@ public class WorkOrderModel {
     public boolean addWorkOrder(WorkOrder workOrder) throws SQLException {
 
         String sql = "INSERT INTO work_order "
-                + "(nomor_wo, nama_pekerjaan, pemohon, tanggal, "
-                + "deskripsi, status) "
+                + "(nama_pekerjaan, pemohon, tanggal, deskripsi, harga, status) "
                 + "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = DatabaseConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            statement.setString(1, workOrder.getNomorWO());
-            statement.setString(2, workOrder.getNamaPekerjaan());
-            statement.setString(3, workOrder.getPemohon());
-            statement.setDate(4,
-                    java.sql.Date.valueOf(workOrder.getTanggal()));
-            statement.setString(5, workOrder.getDeskripsi());
-            statement.setString(7, workOrder.getStatus());
+            statement.setString(1, workOrder.getNamaPekerjaan());
+            statement.setString(2, workOrder.getPemohon());
+            statement.setDate(3, java.sql.Date.valueOf(workOrder.getTanggal()));
+            statement.setString(4, workOrder.getDeskripsi());
+
+            BigDecimal harga = workOrder.getHarga() == null
+                    ? BigDecimal.ZERO : workOrder.getHarga();
+
+            statement.setBigDecimal(5, harga);
+            statement.setString(6, workOrder.getStatus());
 
             return statement.executeUpdate() > 0;
         }
@@ -61,24 +64,27 @@ public class WorkOrderModel {
     public boolean updateWorkOrder(WorkOrder workOrder) throws SQLException {
 
         String sql = "UPDATE work_order SET "
-                + "nomor_wo = ?, "
                 + "nama_pekerjaan = ?, "
                 + "pemohon = ?, "
                 + "tanggal = ?, "
                 + "deskripsi = ?, "
+                + "harga = ?, "
                 + "status = ? "
                 + "WHERE id = ?";
 
         try (Connection connection = DatabaseConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            statement.setString(1, workOrder.getNomorWO());
-            statement.setString(2, workOrder.getNamaPekerjaan());
-            statement.setString(3, workOrder.getPemohon());
-            statement.setDate(4,
-                    java.sql.Date.valueOf(workOrder.getTanggal()));
-            statement.setString(5, workOrder.getDeskripsi());
-            statement.setString(7, workOrder.getStatus());
-            statement.setInt(8, workOrder.getId());
+            statement.setString(1, workOrder.getNamaPekerjaan());
+            statement.setString(2, workOrder.getPemohon());
+            statement.setDate(3, java.sql.Date.valueOf(workOrder.getTanggal()));
+            statement.setString(4, workOrder.getDeskripsi());
+
+            BigDecimal harga = workOrder.getHarga() == null
+                    ? BigDecimal.ZERO : workOrder.getHarga();
+
+            statement.setBigDecimal(5, harga);
+            statement.setString(6, workOrder.getStatus());
+            statement.setInt(7, workOrder.getId());
 
             return statement.executeUpdate() > 0;
         }

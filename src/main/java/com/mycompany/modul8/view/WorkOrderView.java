@@ -6,6 +6,7 @@ import com.mycompany.modul8.model.WorkOrder;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
@@ -27,8 +28,8 @@ public class WorkOrderView extends JPanel {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
 
         String[] columns = {
-            "ID", "Nomor WO", "Nama Pekerjaan",
-            "Pemohon", "Tanggal", "Deskripsi", "Status"
+            "ID", "Nama Pekerjaan", "Pemohon",
+            "Tanggal", "Deskripsi", "Harga (Rp)", "Status"
         };
 
         tableModel = new DefaultTableModel(columns, 0) {
@@ -39,15 +40,27 @@ public class WorkOrderView extends JPanel {
         };
 
         workOrderTable = new JTable(tableModel);
-        workOrderTable.setRowHeight(28);
+        workOrderTable.setRowHeight(32);
+        workOrderTable.setSelectionMode(
+                ListSelectionModel.SINGLE_SELECTION
+        );
+        workOrderTable.setAutoCreateRowSorter(true);
+        workOrderTable.setFillsViewportHeight(true);
+
         workOrderTable.getTableHeader().setFont(
                 new Font("Arial", Font.BOLD, 12)
         );
+        workOrderTable.getTableHeader().setReorderingAllowed(false);
+
+        workOrderTable.getColumnModel().getColumn(0).setPreferredWidth(40);
+        workOrderTable.getColumnModel().getColumn(1).setPreferredWidth(180);
+        workOrderTable.getColumnModel().getColumn(2).setPreferredWidth(140);
+        workOrderTable.getColumnModel().getColumn(3).setPreferredWidth(100);
+        workOrderTable.getColumnModel().getColumn(4).setPreferredWidth(220);
+        workOrderTable.getColumnModel().getColumn(5).setPreferredWidth(120);
+        workOrderTable.getColumnModel().getColumn(6).setPreferredWidth(100);
 
         JScrollPane scrollPane = new JScrollPane(workOrderTable);
-
-        JButton refreshButton = new JButton("Muat Ulang Data");
-        refreshButton.addActionListener(e -> loadWorkOrders());
 
         JButton addButton = new JButton("Tambah Work Order");
         addButton.addActionListener(e -> showAddForm());
@@ -60,7 +73,6 @@ public class WorkOrderView extends JPanel {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBackground(Color.WHITE);
-        buttonPanel.add(refreshButton);
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
@@ -85,11 +97,11 @@ public class WorkOrderView extends JPanel {
             for (WorkOrder workOrder : workOrders) {
                 Object[] row = {
                     workOrder.getId(),
-                    workOrder.getNomorWO(),
                     workOrder.getNamaPekerjaan(),
                     workOrder.getPemohon(),
                     workOrder.getTanggal(),
                     workOrder.getDeskripsi(),
+                    workOrder.getHarga(),
                     workOrder.getStatus()
                 };
 
@@ -107,20 +119,19 @@ public class WorkOrderView extends JPanel {
     }
 
     private void showAddForm() {
-        JTextField nomorWOField = new JTextField();
         JTextField namaPekerjaanField = new JTextField();
         JTextField pemohonField = new JTextField();
         JTextField tanggalField = new JTextField();
         JTextArea deskripsiArea = new JTextArea(3, 20);
+
+        JTextField hargaField = new JTextField("0.00");
+        hargaField.setEditable(false);
 
         JComboBox<String> statusBox = new JComboBox<>(
                 new String[]{"Pending", "Diproses", "Selesai"}
         );
 
         JPanel formPanel = new JPanel(new GridLayout(0, 2, 8, 8));
-
-        formPanel.add(new JLabel("Nomor WO:"));
-        formPanel.add(nomorWOField);
 
         formPanel.add(new JLabel("Nama Pekerjaan:"));
         formPanel.add(namaPekerjaanField);
@@ -133,6 +144,9 @@ public class WorkOrderView extends JPanel {
 
         formPanel.add(new JLabel("Deskripsi:"));
         formPanel.add(new JScrollPane(deskripsiArea));
+
+        formPanel.add(new JLabel("Harga (Rp):"));
+        formPanel.add(hargaField);
 
         formPanel.add(new JLabel("Status:"));
         formPanel.add(statusBox);
@@ -147,17 +161,18 @@ public class WorkOrderView extends JPanel {
 
         if (result == JOptionPane.OK_OPTION) {
             try {
-                String nomorWO = nomorWOField.getText().trim();
                 String namaPekerjaan = namaPekerjaanField.getText().trim();
                 String pemohon = pemohonField.getText().trim();
                 String tanggalText = tanggalField.getText().trim();
                 String deskripsi = deskripsiArea.getText().trim();
 
-                if (nomorWO.isEmpty() || namaPekerjaan.isEmpty()
-                        || pemohon.isEmpty() || tanggalText.isEmpty()) {
+                if (namaPekerjaan.isEmpty()
+                        || pemohon.isEmpty()
+                        || tanggalText.isEmpty()) {
+
                     JOptionPane.showMessageDialog(
                             this,
-                            "Nomor WO, nama pekerjaan, pemohon, dan tanggal wajib diisi."
+                            "Nama pekerjaan, pemohon, dan tanggal wajib diisi."
                     );
                     return;
                 }
@@ -166,11 +181,11 @@ public class WorkOrderView extends JPanel {
 
                 WorkOrder workOrder = new WorkOrder(
                         0,
-                        nomorWO,
                         namaPekerjaan,
                         pemohon,
                         tanggal,
                         deskripsi,
+                        BigDecimal.ZERO,
                         statusBox.getSelectedItem().toString()
                 );
 
@@ -216,42 +231,58 @@ public class WorkOrderView extends JPanel {
             return;
         }
 
-        int id = Integer.parseInt(
-                tableModel.getValueAt(selectedRow, 0).toString()
-        );
+        // Mengubah indeks baris tampilan menjadi indeks data tabel.
+        int modelRow = workOrderTable.convertRowIndexToModel(selectedRow);
 
-        JTextField nomorWOField = new JTextField(
-                tableModel.getValueAt(selectedRow, 1).toString()
+        int id = Integer.parseInt(
+                tableModel.getValueAt(modelRow, 0).toString()
         );
 
         JTextField namaPekerjaanField = new JTextField(
-                tableModel.getValueAt(selectedRow, 2).toString()
+                tableModel.getValueAt(modelRow, 1).toString()
         );
 
         JTextField pemohonField = new JTextField(
-                tableModel.getValueAt(selectedRow, 3).toString()
+                tableModel.getValueAt(modelRow, 2).toString()
         );
 
         JTextField tanggalField = new JTextField(
-                tableModel.getValueAt(selectedRow, 4).toString()
+                tableModel.getValueAt(modelRow, 3).toString()
         );
 
         JTextArea deskripsiArea = new JTextArea(
-                tableModel.getValueAt(selectedRow, 5).toString(), 3, 20
+                tableModel.getValueAt(modelRow, 4).toString(), 3, 20
+        );
+
+        BigDecimal hargaLama = (BigDecimal) tableModel.getValueAt(modelRow, 5);
+
+        JTextField hargaField = new JTextField(
+                hargaLama.toPlainString()
         );
 
         JComboBox<String> statusBox = new JComboBox<>(
                 new String[]{"Pending", "Diproses", "Selesai"}
         );
 
-        statusBox.setSelectedItem(
-                tableModel.getValueAt(selectedRow, 7).toString()
-        );
+        String statusLama = tableModel.getValueAt(modelRow, 6).toString();
+        statusBox.setSelectedItem(statusLama);
+
+        // Harga hanya bisa diedit ketika status Diproses.
+        hargaField.setEditable("Diproses".equals(statusLama));
+
+        statusBox.addActionListener(e -> {
+            boolean dapatEdit = "Diproses".equals(
+                    statusBox.getSelectedItem()
+            );
+
+            hargaField.setEditable(dapatEdit);
+
+            if (!dapatEdit) {
+                hargaField.setText(hargaLama.toPlainString());
+            }
+        });
 
         JPanel formPanel = new JPanel(new GridLayout(0, 2, 8, 8));
-
-        formPanel.add(new JLabel("Nomor WO:"));
-        formPanel.add(nomorWOField);
 
         formPanel.add(new JLabel("Nama Pekerjaan:"));
         formPanel.add(namaPekerjaanField);
@@ -264,6 +295,9 @@ public class WorkOrderView extends JPanel {
 
         formPanel.add(new JLabel("Deskripsi:"));
         formPanel.add(new JScrollPane(deskripsiArea));
+
+        formPanel.add(new JLabel("Harga (Rp):"));
+        formPanel.add(hargaField);
 
         formPanel.add(new JLabel("Status:"));
         formPanel.add(statusBox);
@@ -278,31 +312,52 @@ public class WorkOrderView extends JPanel {
 
         if (result == JOptionPane.OK_OPTION) {
             try {
-                String nomorWO = nomorWOField.getText().trim();
                 String namaPekerjaan = namaPekerjaanField.getText().trim();
                 String pemohon = pemohonField.getText().trim();
                 String tanggalText = tanggalField.getText().trim();
                 String deskripsi = deskripsiArea.getText().trim();
+                String status = statusBox.getSelectedItem().toString();
 
-                if (nomorWO.isEmpty() || namaPekerjaan.isEmpty()
-                        || pemohon.isEmpty() || tanggalText.isEmpty()) {
+                if (namaPekerjaan.isEmpty()
+                        || pemohon.isEmpty()
+                        || tanggalText.isEmpty()) {
+
                     JOptionPane.showMessageDialog(
                             this,
-                            "Semua kolom wajib diisi kecuali deskripsi."
+                            "Nama pekerjaan, pemohon, dan tanggal wajib diisi."
                     );
                     return;
+                }
+
+                BigDecimal harga;
+
+                if ("Diproses".equals(status)) {
+                    String hargaText = hargaField.getText().trim()
+                            .replace(",", ".");
+
+                    harga = new BigDecimal(hargaText);
+
+                    if (harga.compareTo(BigDecimal.ZERO) < 0) {
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Harga tidak boleh negatif."
+                        );
+                        return;
+                    }
+                } else {
+                    harga = hargaLama;
                 }
 
                 LocalDate tanggal = LocalDate.parse(tanggalText);
 
                 WorkOrder workOrder = new WorkOrder(
                         id,
-                        nomorWO,
                         namaPekerjaan,
                         pemohon,
                         tanggal,
                         deskripsi,
-                        statusBox.getSelectedItem().toString()
+                        harga,
+                        status
                 );
 
                 boolean success = controller.updateWorkOrder(workOrder);
@@ -320,6 +375,11 @@ public class WorkOrderView extends JPanel {
                     );
                 }
 
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Format harga tidak valid. Contoh: 5000000 atau 5000000.00"
+                );
             } catch (java.time.format.DateTimeParseException e) {
                 JOptionPane.showMessageDialog(
                         this,
@@ -347,6 +407,8 @@ public class WorkOrderView extends JPanel {
             return;
         }
 
+        int modelRow = workOrderTable.convertRowIndexToModel(selectedRow);
+
         int confirm = JOptionPane.showConfirmDialog(
                 this,
                 "Apakah kamu yakin ingin menghapus Work Order ini?",
@@ -358,7 +420,7 @@ public class WorkOrderView extends JPanel {
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 int id = Integer.parseInt(
-                        tableModel.getValueAt(selectedRow, 0).toString()
+                        tableModel.getValueAt(modelRow, 0).toString()
                 );
 
                 boolean success = controller.deleteWorkOrder(id);
@@ -368,7 +430,6 @@ public class WorkOrderView extends JPanel {
                             this,
                             "Work Order berhasil dihapus."
                     );
-
                     loadWorkOrders();
                 } else {
                     JOptionPane.showMessageDialog(
