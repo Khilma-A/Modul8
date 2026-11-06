@@ -2,6 +2,7 @@ package com.mycompany.modul8.view;
 
 import javax.swing.*;
 import java.awt.*;
+import com.mycompany.modul8.view.WorkOrderView;
 
 public class MainView extends JFrame {
 
@@ -58,6 +59,18 @@ public class MainView extends JFrame {
         welcomePanel.add(welcomeLabel);
         welcomePanel.add(descriptionLabel);
 
+        JButton workOrderButton = new JButton("Lihat Daftar Work Order");
+        workOrderButton.setFont(new Font("Arial", Font.BOLD, 14));
+        workOrderButton.setPreferredSize(new Dimension(230, 40));
+
+        workOrderButton.addActionListener(e -> {
+            getContentPane().removeAll();
+            add(new WorkOrderView());
+            revalidate();
+            repaint();
+        });
+
+        welcomePanel.add(workOrderButton);
         contentPanel.add(welcomePanel);
 
         JLabel footerLabel = new JLabel(
