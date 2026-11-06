@@ -15,7 +15,7 @@ public class WorkOrderModel {
 
         List<WorkOrder> workOrders = new ArrayList<>();
 
-        String sql = "SELECT * FROM work_order ORDER BY id DESC";
+        String sql = "SELECT * FROM work_order ORDER BY id ASC";
 
         try (Connection connection = DatabaseConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(sql); ResultSet result = statement.executeQuery()) {
 
