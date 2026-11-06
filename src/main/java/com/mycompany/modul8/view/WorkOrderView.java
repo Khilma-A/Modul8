@@ -28,7 +28,7 @@ public class WorkOrderView extends JPanel {
 
         String[] columns = {
             "ID", "Nomor WO", "Nama Pekerjaan",
-            "Pemohon", "Tanggal", "Status"
+            "Pemohon", "Tanggal", "Deskripsi", "Status"
         };
 
         tableModel = new DefaultTableModel(columns, 0) {
@@ -52,10 +52,14 @@ public class WorkOrderView extends JPanel {
         JButton addButton = new JButton("Tambah Work Order");
         addButton.addActionListener(e -> showAddForm());
 
+        JButton editButton = new JButton("Edit Work Order");
+        editButton.addActionListener(e -> showEditForm());
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBackground(Color.WHITE);
         buttonPanel.add(refreshButton);
         buttonPanel.add(addButton);
+        buttonPanel.add(editButton);
 
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(Color.WHITE);
@@ -81,6 +85,7 @@ public class WorkOrderView extends JPanel {
                     workOrder.getNamaPekerjaan(),
                     workOrder.getPemohon(),
                     workOrder.getTanggal(),
+                    workOrder.getDeskripsi(),
                     workOrder.getStatus()
                 };
 
@@ -189,6 +194,137 @@ public class WorkOrderView extends JPanel {
                 JOptionPane.showMessageDialog(
                         this,
                         "Gagal menyimpan Work Order: " + e.getMessage(),
+                        "Kesalahan Database",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    }
+
+    private void showEditForm() {
+        int selectedRow = workOrderTable.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Pilih data Work Order yang ingin diubah terlebih dahulu."
+            );
+            return;
+        }
+
+        int id = Integer.parseInt(
+                tableModel.getValueAt(selectedRow, 0).toString()
+        );
+
+        JTextField nomorWOField = new JTextField(
+                tableModel.getValueAt(selectedRow, 1).toString()
+        );
+
+        JTextField namaPekerjaanField = new JTextField(
+                tableModel.getValueAt(selectedRow, 2).toString()
+        );
+
+        JTextField pemohonField = new JTextField(
+                tableModel.getValueAt(selectedRow, 3).toString()
+        );
+
+        JTextField tanggalField = new JTextField(
+                tableModel.getValueAt(selectedRow, 4).toString()
+        );
+
+        JTextArea deskripsiArea = new JTextArea(
+                tableModel.getValueAt(selectedRow, 5).toString(), 3, 20
+        );
+
+        JComboBox<String> statusBox = new JComboBox<>(
+                new String[]{"Pending", "Diproses", "Selesai"}
+        );
+
+        statusBox.setSelectedItem(
+                tableModel.getValueAt(selectedRow, 7).toString()
+        );
+
+        JPanel formPanel = new JPanel(new GridLayout(0, 2, 8, 8));
+
+        formPanel.add(new JLabel("Nomor WO:"));
+        formPanel.add(nomorWOField);
+
+        formPanel.add(new JLabel("Nama Pekerjaan:"));
+        formPanel.add(namaPekerjaanField);
+
+        formPanel.add(new JLabel("Pemohon:"));
+        formPanel.add(pemohonField);
+
+        formPanel.add(new JLabel("Tanggal (YYYY-MM-DD):"));
+        formPanel.add(tanggalField);
+
+        formPanel.add(new JLabel("Deskripsi:"));
+        formPanel.add(new JScrollPane(deskripsiArea));
+
+        formPanel.add(new JLabel("Status:"));
+        formPanel.add(statusBox);
+
+        int result = JOptionPane.showConfirmDialog(
+                this,
+                formPanel,
+                "Edit Work Order",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                String nomorWO = nomorWOField.getText().trim();
+                String namaPekerjaan = namaPekerjaanField.getText().trim();
+                String pemohon = pemohonField.getText().trim();
+                String tanggalText = tanggalField.getText().trim();
+                String deskripsi = deskripsiArea.getText().trim();
+
+                if (nomorWO.isEmpty() || namaPekerjaan.isEmpty()
+                        || pemohon.isEmpty() || tanggalText.isEmpty()) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Semua kolom wajib diisi kecuali deskripsi."
+                    );
+                    return;
+                }
+
+                LocalDate tanggal = LocalDate.parse(tanggalText);
+
+                WorkOrder workOrder = new WorkOrder(
+                        id,
+                        nomorWO,
+                        namaPekerjaan,
+                        pemohon,
+                        tanggal,
+                        deskripsi,
+                        statusBox.getSelectedItem().toString()
+                );
+
+                boolean success = controller.updateWorkOrder(workOrder);
+
+                if (success) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Work Order berhasil diperbarui."
+                    );
+                    loadWorkOrders();
+                } else {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Work Order gagal diperbarui."
+                    );
+                }
+
+            } catch (java.time.format.DateTimeParseException e) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Format tanggal tidak valid. Gunakan YYYY-MM-DD."
+                );
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Gagal memperbarui Work Order: " + e.getMessage(),
                         "Kesalahan Database",
                         JOptionPane.ERROR_MESSAGE
                 );
