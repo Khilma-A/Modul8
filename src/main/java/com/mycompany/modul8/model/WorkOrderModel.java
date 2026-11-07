@@ -8,9 +8,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import com.mycompany.modul8.repository.WorkOrderReader;
+import com.mycompany.modul8.repository.WorkOrderWriter;
+import com.mycompany.modul8.repository.WorkOrderDeleter;
 
-public class WorkOrderModel {
+public class WorkOrderModel implements
+        WorkOrderReader,
+        WorkOrderWriter,
+        WorkOrderDeleter {
 
+    @Override
     public List<WorkOrder> getAllWorkOrders() throws SQLException {
 
         List<WorkOrder> workOrders = new ArrayList<>();
@@ -38,6 +45,7 @@ public class WorkOrderModel {
         return workOrders;
     }
 
+    @Override
     public boolean addWorkOrder(WorkOrder workOrder) throws SQLException {
 
         String sql = "INSERT INTO work_order "
@@ -61,6 +69,7 @@ public class WorkOrderModel {
         }
     }
 
+    @Override
     public boolean updateWorkOrder(WorkOrder workOrder) throws SQLException {
 
         String sql = "UPDATE work_order SET "
@@ -90,6 +99,7 @@ public class WorkOrderModel {
         }
     }
 
+    @Override
     public boolean deleteWorkOrder(int id) throws SQLException {
 
         String sql = "DELETE FROM work_order WHERE id = ?";

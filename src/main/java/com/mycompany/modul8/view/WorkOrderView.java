@@ -2,7 +2,10 @@ package com.mycompany.modul8.view;
 
 import com.mycompany.modul8.controller.WorkOrderController;
 import com.mycompany.modul8.model.WorkOrder;
-
+import com.mycompany.modul8.model.WorkOrderModel;
+import com.mycompany.modul8.repository.WorkOrderReader;
+import com.mycompany.modul8.repository.WorkOrderWriter;
+import com.mycompany.modul8.repository.WorkOrderDeleter;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -18,7 +21,13 @@ public class WorkOrderView extends JPanel {
     private final JTable workOrderTable;
 
     public WorkOrderView() {
-        controller = new WorkOrderController();
+        WorkOrderModel model = new WorkOrderModel();
+
+        this.controller = new WorkOrderController(
+                model,
+                model,
+                model
+        );
 
         setLayout(new BorderLayout(10, 10));
         setBackground(Color.WHITE);

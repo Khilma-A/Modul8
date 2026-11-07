@@ -2,30 +2,41 @@ package com.mycompany.modul8.controller;
 
 import com.mycompany.modul8.model.WorkOrder;
 import com.mycompany.modul8.model.WorkOrderModel;
+import com.mycompany.modul8.repository.WorkOrderReader;
+import com.mycompany.modul8.repository.WorkOrderWriter;
+import com.mycompany.modul8.repository.WorkOrderDeleter;
 import java.sql.SQLException;
 import java.util.List;
 
 public class WorkOrderController {
 
-    private final WorkOrderModel workOrderModel;
+    private final WorkOrderReader reader;
+    private final WorkOrderWriter writer;
+    private final WorkOrderDeleter deleter;
 
-    public WorkOrderController() {
-        this.workOrderModel = new WorkOrderModel();
+    public WorkOrderController(
+            WorkOrderReader reader,
+            WorkOrderWriter writer,
+            WorkOrderDeleter deleter) {
+
+        this.reader = reader;
+        this.writer = writer;
+        this.deleter = deleter;
     }
 
     public List<WorkOrder> getAllWorkOrders() throws SQLException {
-        return workOrderModel.getAllWorkOrders();
+        return reader.getAllWorkOrders();
     }
 
     public boolean addWorkOrder(WorkOrder workOrder) throws SQLException {
-        return workOrderModel.addWorkOrder(workOrder);
+        return writer.addWorkOrder(workOrder);
     }
 
     public boolean updateWorkOrder(WorkOrder workOrder) throws SQLException {
-        return workOrderModel.updateWorkOrder(workOrder);
+        return writer.updateWorkOrder(workOrder);
     }
 
     public boolean deleteWorkOrder(int id) throws SQLException {
-        return workOrderModel.deleteWorkOrder(id);
+        return deleter.deleteWorkOrder(id);
     }
 }
